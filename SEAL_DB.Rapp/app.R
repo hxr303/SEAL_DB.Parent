@@ -6,20 +6,28 @@ library(DBI)
 library(RPostgreSQL)
 
 # Define the server adress
-con <-  
-  
-  # UI sections defined
-  ## Welcome UI
-  welcome_tab_ui <- shinydashboard::tabItem(
-    tabName = "welcome",
-    fluidPage(
-      titlePanel("Image Viewer"),
-      p("This database currently contains bone images from six species distributed
+con <- dbConnect(
+  PostgreSQL(),
+  dbname = "S.E.A.L.",           #name of imported database
+  port = 5432,                   #port of imported server
+  user = "postgres",             #username
+  password = "password")         #password
+
+data1 <- dbGetQuery(con, initial.query)
+data2 <- dbGetQuery(con, initial.query)
+
+# UI sections defined
+## Welcome UI
+welcome_tab_ui <- shinydashboard::tabItem(
+  tabName = "welcome",
+  fluidPage(
+    titlePanel("Image Viewer"),
+    p("This database currently contains bone images from six species distributed
       across three families within the suborder Pinnipedia. The families present
       are Phocidae (fur seals and sea lions), Odobenidae (walruses), and
       Otariidae (eared seals) [1], [2].")
-    )
   )
+)
 
 ## Search UI
 search_tab_ui <- shinydashboard::tabItem(
@@ -148,7 +156,6 @@ server <- function(input, output, session) {
       cell_col <- info$col
       new_value <- info$value
       
-      # Capture the update
       update <- data.frame(
         Row = cell_row,
         Column = colnames(modified_data)[cell_col],
@@ -156,8 +163,10 @@ server <- function(input, output, session) {
         New_Value = new_value
       )
       
-      # Print debugging information
-      cat("Cell Edited - Row:", cell_row, "Column:", cell_col, "New Value:", new_value, "\n")
+      cat("Cell Edited - Row:", cell_row,
+          "Column:", cell_col,
+          "New Value:", new_value,
+          "\n")
       
       # Update the reactive data
       modified_data[cell_row, cell_col] <- new_value
@@ -166,6 +175,13 @@ server <- function(input, output, session) {
       # Update the reactive value with the captured update
       updates(rbind(updates(), update))
     }
+  })
+  
+  # Expose updates for About Seal tab
+  observeEvent(updates(), {
+    updates_data <- updates()
+    updateTabsetPanel(session, "mainTabs", "about_seal")
+    updateTextAreaInput(session, "updates_text", value = paste0(capture.output(updates_data), collapse = "\n"))
   })
 }
 
