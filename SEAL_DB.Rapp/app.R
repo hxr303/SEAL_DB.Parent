@@ -1,22 +1,27 @@
+library(shinyjs)
 library(shiny)
 library(shinydashboard)
 library(DT)
+library(DBI)
+library(RPostgreSQL)
 
-
-# UI sections defined
+# Define the server adress
+con <-  
+  
+  # UI sections defined
   ## Welcome UI
-welcome_tab_ui <- shinydashboard::tabItem(
-  tabName = "welcome",
-  fluidPage(
-    titlePanel("Image Viewer"),
-    p("This database currently contains bone images from six species distributed
+  welcome_tab_ui <- shinydashboard::tabItem(
+    tabName = "welcome",
+    fluidPage(
+      titlePanel("Image Viewer"),
+      p("This database currently contains bone images from six species distributed
       across three families within the suborder Pinnipedia. The families present
       are Phocidae (fur seals and sea lions), Odobenidae (walruses), and
       Otariidae (eared seals) [1], [2].")
+    )
   )
-)
 
-  ## Search UI
+## Search UI
 search_tab_ui <- shinydashboard::tabItem(
   
   fluidRow(
@@ -104,7 +109,7 @@ server <- function(input, output, session) {
     list(src = img_path, 
          alt = "Selected Image",
          width = "100%")}, 
-  deleteFile = FALSE)
+    deleteFile = FALSE)
   
   ## Updates the contents of the drop-down menu for Seal images 
   observe({
@@ -113,7 +118,7 @@ server <- function(input, output, session) {
   
   ## Render data table function
   output$table_view <- renderDT({data()},
-    options = list(scrollX = TRUE, searching = FALSE))
+                                options = list(scrollX = TRUE, searching = FALSE))
   
   ## React to pressing search button
   observeEvent(input$search_button, {
@@ -122,14 +127,14 @@ server <- function(input, output, session) {
     if (length(search_words) > 0) {
       filtered_data <- data()[apply(data(), 1, 
                                     function(row) {
-        all(sapply(search_words, function(word) any(grepl(paste0("\\b", word, "\\b"), tolower(row), ignore.case = TRUE))))
-      }),
+                                      all(sapply(search_words, function(word) any(grepl(paste0("\\b", word, "\\b"), tolower(row), ignore.case = TRUE))))
+                                    }),
       ]
     }
     else {filtered_data <- data()}
     
     output$update_table <- renderDT({filtered_data},
-      options = list(scrollX = TRUE, dom = 'Bfrtip', buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
+                                    options = list(scrollX = TRUE, dom = 'Bfrtip', buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
   }
   )
   
