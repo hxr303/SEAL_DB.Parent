@@ -1,194 +1,232 @@
-library(shinyjs)
+# install.packages(c("shiny", "shinydashboard", "DT", "sodium", "RPostgreSQL", "DBI", "shinyjs", "shinyauthr"))
+
+
 library(shiny)
 library(shinydashboard)
 library(DT)
-library(DBI)
-library(RPostgreSQL)
+library(shinyjs)
+library(sodium)
 
 rm(list=ls())
-setwd("/")
 
-# Define the server address 
-con <- dbConnect(
-  PostgreSQL(),
-  dbname = "TEST1",           #name of imported database
-  port = 5432,                   #port of imported server
-  user = "postgres",             #username
-  password = "password")         #password
-
-
-# UI sections defined
-## Welcome UI
-welcome_tab_ui <- shinydashboard::tabItem(
-  tabName = "welcome",
-  fluidPage(
-    titlePanel("Image Viewer"),
-    p("This database currently contains bone images from six species distributed
-      across three families within the suborder Pinnipedia. The families present
-      are Phocidae (fur seals and sea lions), Odobenidae (walruses), and
-      Otariidae (eared seals) [1], [2].")
-  )
+# Main login screen
+loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margin: 0 auto; padding: 20px;",
+                 wellPanel(
+                   tags$h2("LOG IN", class = "text-center", style = "padding-top: 0;color:#333; font-weight:600;"),
+                   img(src = "https://github.com/hxr303/S.E.A.L.-Database/blob/main/FlogoBN.jpg?raw=true", width = "200px", height = "160px", style = "display: block; margin: 0 auto;"),
+                   textInput("userName", placeholder="Username", label = tagList(icon("user"), "Username")),
+                   passwordInput("passwd", placeholder="Password", label = tagList(icon("unlock-alt"), "Password")),
+                   br(),
+                   div(
+                     style = "text-align: center;",
+                     actionButton("login", "SIGN IN", style = "color: white; background-color:#3c8dbc;
+                                 padding: 10px 15px; width: 150px; cursor: pointer;
+                                 font-size: 18px; font-weight: 600;"),
+                     shinyjs::hidden(
+                       div(id = "nomatch",
+                           tags$p("Incorrect username or password!",
+                                  style = "color: red; font-weight: 600; 
+                                            padding-top: 5px;font-size:16px;", 
+                                  class = "text-center"))),
+                     br(),
+                     br(),
+                     tags$code("Username: Admin  Password: pass"),
+                     br(),
+                     tags$code("Username: Viewer  Password: sightseeing"),
+                     br(),
+                     tags$code("Username: Guest (Create account)  Password: 123")
+                     
+                   ))
 )
 
-## Search UI
-search_tab_ui <- shinydashboard::tabItem(
-  
-  fluidRow(
-    box(
-      title = "Search",
-      status = "primary",
-      solidHeader = TRUE,
-      width = 12,
-      textInput("search_input", label = "Enter search words", value = ""),
-      actionButton("search_button", "Search")
-    ),
-    
-    fluidRow(
-      box(
-        title = "Search Results",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 12,
-        DTOutput("search_result"),
-        textOutput("error")
-      )
-    )
-  )
+credentials = data.frame(
+  username_id = c("Admin", "Viewer", "Guest"),
+  passod   = sapply(c("pass", "sightseeing", "123"),password_store),
+  permission  = c("advanced", "basic", "none"), 
+  stringsAsFactors = FALSE
 )
 
-## Update UI
-update_tab_ui <- shinydashboard::tabItem(
-  tabName = "update_tab",
-  fluidPage(
-    titlePanel("Update Data"),
-    p("This section allows you to update data in the database. Customize this UI as needed."),
-    fluidRow(
-      box(
-        title = "Update Table",
-        status = "primary",
-        solidHeader = TRUE,
-        width = 12,
-        DTOutput("update_table")
-      )
-    )
-  )
-)
+header <- dashboardHeader( title = "S.E.A.L Database",
+                           tags$li(
+                             class = "dropdown",
+                             style = "padding: 8px;",
+                             shinyauthr::logoutUI("logout")
+                           ),
+                           tags$li(
+                             class = "dropdown",
+                             tags$a(
+                               icon("github"),
+                               href = "https://github.com/SlippyRicky/SEAL-DB.git",
+                               title = "SEAL-DB"
+                             )))
 
-# UI function for the dashboard
-dashboard_ui <- shinydashboard::dashboardPage(
-  skin = "purple",
-  dashboardHeader(title = "S.E.A.L."),
-  dashboardSidebar(
-    sidebarMenu(
-      menuItem("Welcome", tabName = "welcome_tab", icon = icon("home")),
-      menuItem("Search", tabName = "search_tab", icon = icon("search")),
-      menuItem("Downloads", tabName = "update_tab_ui", icon = icon("download")), 
-      menuItem("Update", tabName = "edit_values", icon = icon("edit")),
-      menuItem("About", tabName = "about", icon = icon("info-circle"))
-    )
-  ),
-  dashboardBody(
-    tabItems(
-      tabItem(tabName = "welcome_tab", welcome_tab_ui),
-      tabItem(tabName = "search_tab", search_tab_ui),
-      tabItem(tabName = "dowload_tab"),
-      tabItem(tabName = "update_table"),
-      tabItem(tabName = "about_tab")
-    )
-  ),
-)
 
-# Define server logic
+sidebar <- dashboardSidebar(uiOutput("sidebarpanel")) 
+body <- dashboardBody(shinyjs::useShinyjs(), uiOutput("body"))
+ui<-dashboardPage(header, sidebar, body, skin = "blue")   
+
+
 server <- function(input, output, session) {
   
-  # Read data from the "data_tags.csv" file
-  initial.query <- "SELECT * FROM data_tags"
-  data1 <- dbGetQuery(con, initial.query)
-  data2 <- dbGetQuery(con, initial.query)
   
-  updates <- reactiveVal(NULL)
+  login = FALSE
+  USER <- reactiveValues(login = login)
   
-  ## Retrieve images from given file name
-  output$selectedImage <- renderImage({
-    
-    ## Define the images' source directory
-    img_dir <- "www/"
-    
-    ## Concatenate the image file path
-    img_path <- file.path(img_dir, paste0(input$image, ".png"))
-    
-    ## Compose image formatting details 
-    list(src = img_path, 
-         alt = "Selected Image",
-         width = "100%")}, 
-    deleteFile = FALSE)
+  observe({ 
+    if (USER$login == FALSE) {
+      if (!is.null(input$login)) {
+        if (input$login > 0) {
+          Username <- isolate(input$userName)
+          Password <- isolate(input$passwd)
+          if(length(which(credentials$username_id==Username))==1) { 
+            pasmatch  <- credentials["passod"][which(credentials$username_id==Username),]
+            pasverify <- password_verify(pasmatch, Password)
+            if(pasverify) {
+              USER$login <- TRUE
+            } else {
+              shinyjs::toggle(id = "nomatch", anim = TRUE, time = 1, animType = "fade")
+              shinyjs::delay(3000, shinyjs::toggle(id = "nomatch", anim = TRUE, time = 1, animType = "fade"))
+            }
+          } else {
+            shinyjs::toggle(id = "nomatch", anim = TRUE, time = 1, animType = "fade")
+            shinyjs::delay(3000, shinyjs::toggle(id = "nomatch", anim = TRUE, time = 1, animType = "fade"))
+          }
+        } 
+      }
+    }})    
   
-  ## Updates the contents of the drop-down menu for Seal images 
-  observe({
-    updateSelectInput(session, "image", choices = slidenames.vector)
+  output$logoutbtn <- renderUI({
+    req(USER$login)
+    tags$li(a(icon("fa fa-sign-out"), "Logout", 
+              href="javascript:window.location.reload(true)"),
+            class = "dropdown", 
+            style = "background-color: #eee !important; border: 0;
+                    font-weight: bold; margin:5px; padding: 10px;")
   })
   
-  ## Render data table function
-  output$table_view <- shiny::renderDataTable({data1},
-                                options = list(scrollX = TRUE, searching = FALSE))
   
-  ## React to pressing search button
-  observeEvent(input$search_button, {
-    search_words <- tolower(strsplit(input$search_input, " ")[[1]])
-    
-    if (length(search_words) > 0) {
-      filtered_data <- data()[apply(data(), 1, 
-                                    function(row) {
-                                      all(sapply(search_words, function(word) any(grepl(paste0("\\b", word, "\\b"), tolower(row), ignore.case = TRUE))))
-                                    }),
-      ]
-    }
-    else {filtered_data <- data()}
-    
-    output$update_table <- renderDT({filtered_data},
-                                    options = list(scrollX = TRUE, dom = 'Bfrtip', buttons = c('copy', 'csv', 'excel', 'pdf', 'print')))
-  }
-  )
-  
-  ## Run the Updates 
-  observeEvent(input$update_table_cell_edit, {
-    info <- input$update_table_cell_edit
-    modified_data <- data()
-    
-    if (!is.null(info)) {
-      cell_row <- info$row
-      cell_col <- info$col
-      new_value <- info$value
+  output$sidebarpanel <- renderUI({
+    if (USER$login == TRUE) {
+      user_permission <- credentials[credentials$username_id == isolate(input$userName), "permission"]
       
-      update <- data.frame(
-        Row = cell_row,
-        Column = colnames(modified_data)[cell_col],
-        Old_Value = modified_data[cell_row, cell_col],
-        New_Value = new_value
+      menuItems <- list()
+      
+      if (user_permission %in% c("none")) {
+        menuItems <- c(menuItems, list(menuItem("Create account", tabName = "create_account", icon = icon("user"))))
+      }
+      if (user_permission %in% c("basic")) {
+        menuItems <- c(
+          menuItems,
+          list(menuItem("Search", tabName = "search_db", icon = icon("search"))),
+          list(menuItem("About", tabName = "about", icon = icon("info-circle")))
+        )
+      }
+      if (user_permission %in% c("advanced")) {
+        menuItems <- c(
+          menuItems,
+          list(menuItem("Welcome", tabName = "welcome_tab", icon = icon("home"))),
+          list(menuItem("Search", tabName = "search_tab", icon = icon("search"))),
+          list(menuItem("Download", tabName = "download_tab", icon = icon("download"))),
+          list(menuItem("Update", tabName = "update_tab", icon = icon("exchange-alt"))),
+          list(menuItem("Create Account", tabName = "create_account", icon = icon("user")))
+        )
+      }
+      
+      sidebarMenu(menuItems)
+    }
+  })
+  
+  
+  
+  
+  output$body <- renderUI({
+    if (USER$login == TRUE ) {
+      tabItems(
+        tabItem(tabName = "welcome_tab",
+                fluidPage(
+                  titlePanel("Image Viewer"),
+                  p("This database currently contains bone
+                    images from six species distributed
+                    across three families within the suborder
+                    Pinnipedia. The families present are Phocidae
+                    (fur seals and sea lions), Odobenidae
+                    (walruses), andOtariidae (eared seals) [1],[2].")
+                )
+        ),
+        
+        tabItem(tabName = "search_tab",
+                h2("Search"),
+                fluidRow(
+                  box(
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    textInput("search_input", label = "Enter search words", value = ""),
+                    actionButton("search_button", "Search")
+                  )
+                ),
+                fluidRow(
+                  box(
+                    title = "Search Results",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    DTOutput("search_result"),
+                    textOutput("error")
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "dowload_tab"), 
+        
+        tabItem(tabName = "update_tab",
+                fluidPage(
+                  titlePanel("Update Data"),
+                  p("This section allows you to update data in the database.
+                    Customize this UI as needed."),
+                  fluidRow(
+                    box(
+                      title = "Update Table",
+                      status = "primary",
+                      solidHeader = TRUE,
+                      width = 12,
+                      DTOutput("update_table")
+                    )
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "create_account",
+                h2("Create Account"),
+                textInput("new_username", "Username"),
+                passwordInput("new_password", "Password",
+                              placeholder = "Beware of the password you use"),
+                passwordInput("confirm_password", "Confirm Password"),
+                textInput("additional_comments", "Additional Comments",
+                          placeholder = "Please write name and student ID
+                          if applicable"),
+                actionButton("create_account_btn", "Create Account")
+        )
       )
       
-      cat("Cell Edited - Row:", cell_row,
-          "Column:", cell_col,
-          "New Value:", new_value,
-          "\n")
-      
-      # Update the reactive data
-      modified_data[cell_row, cell_col] <- new_value
-      data(modified_data)
-      
-      # Update the reactive value with the captured update
-      updates(rbind(updates(), update))
     }
+    
+    else {loginpage}
+    
   })
   
-  # Expose updates for About Seal tab
-  observeEvent(updates(), {
-    updates_data <- updates()
-    updateTabsetPanel(session, "mainTabs", "about_seal")
-    updateTextAreaInput(session, "updates_text", value = paste0(capture.output(updates_data), collapse = "\n"))
+  output$results <- DT::renderDataTable({
+    datatable(iris, options = list(autoWidth = TRUE,
+                                   searching = FALSE))
+  })
+  
+  output$results2 <- DT::renderDataTable({
+    datatable(mtcars, options = list(autoWidth = TRUE,
+                                     searching = FALSE))
   })
 }
 
-# Run the application 
-shiny::shinyApp(ui = dashboard_ui, server = server)
+
+shinyApp(ui = ui, server = server)
+
 
