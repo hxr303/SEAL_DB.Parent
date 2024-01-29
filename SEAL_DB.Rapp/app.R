@@ -5,16 +5,17 @@ library(DT)
 library(DBI)
 library(RPostgreSQL)
 
-# Define the server adress
+rm(list=ls())
+setwd("/")
+
+# Define the server address 
 con <- dbConnect(
   PostgreSQL(),
-  dbname = "S.E.A.L.",           #name of imported database
+  dbname = "TEST1",           #name of imported database
   port = 5432,                   #port of imported server
   user = "postgres",             #username
   password = "password")         #password
 
-data1 <- dbGetQuery(con, initial.query)
-data2 <- dbGetQuery(con, initial.query)
 
 # UI sections defined
 ## Welcome UI
@@ -97,12 +98,15 @@ dashboard_ui <- shinydashboard::dashboardPage(
   ),
 )
 
-# Defining Server Dependencies
-slidenames <- read.csv("SlideNames.csv")
-slidenames.vector <- unique(slidenames$Slide.Name)
-
 # Define server logic
 server <- function(input, output, session) {
+  
+  # Read data from the "data_tags.csv" file
+  initial.query <- "SELECT * FROM data_tags"
+  data1 <- dbGetQuery(con, initial.query)
+  data2 <- dbGetQuery(con, initial.query)
+  
+  updates <- reactiveVal(NULL)
   
   ## Retrieve images from given file name
   output$selectedImage <- renderImage({
@@ -113,7 +117,7 @@ server <- function(input, output, session) {
     ## Concatenate the image file path
     img_path <- file.path(img_dir, paste0(input$image, ".png"))
     
-    ## Compose metadata
+    ## Compose image formatting details 
     list(src = img_path, 
          alt = "Selected Image",
          width = "100%")}, 
@@ -125,7 +129,7 @@ server <- function(input, output, session) {
   })
   
   ## Render data table function
-  output$table_view <- renderDT({data()},
+  output$table_view <- shiny::renderDataTable({data1},
                                 options = list(scrollX = TRUE, searching = FALSE))
   
   ## React to pressing search button
