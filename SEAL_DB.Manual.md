@@ -1090,11 +1090,6 @@ table <- dbGetQuery(con, query)
 
 **6. Users**
 
-Create a user
-```r
-???
-```
-
 <br>
 
 Query the user documentation
@@ -1282,22 +1277,6 @@ table <- dbGetQuery(con, query)
 ```
 
 <br>
-<br>
-
-**6. Query the editing history**
-
-```r
-???
-```
-
-<br>
-
----
-
-<br>
-
-## 6. USE of Shiny APP
-
 <br>
 
 
