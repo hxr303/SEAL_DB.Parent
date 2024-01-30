@@ -42,7 +42,7 @@ loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margi
 
 credentials = data.frame(
   username_id = c("Admin", "Viewer", "Guest"),
-  passod   = sapply(c("pass", "sightseeing", "123"),password_store),
+  passod   = sapply(c("pass", "sightseeing", "123"), password_store),
   permission  = c("advanced", "basic", "none"), 
   stringsAsFactors = FALSE
 )
@@ -62,16 +62,45 @@ header <- dashboardHeader( title = "S.E.A.L Database",
                              )))
 
 
-sidebar <- dashboardSidebar(uiOutput("sidebarpanel")) 
-body <- dashboardBody(shinyjs::useShinyjs(), uiOutput("body"))
-ui<-dashboardPage(header, sidebar, body, skin = "blue")
+sidebar <- dashboardSidebar(uiOutput("sidebarpanel"),
+                            collapsed = TRUE
+)
+
+body <- dashboardBody(shinyjs::useShinyjs(),
+                      uiOutput("body")
+)
+
+js_code <- '
+$(document).ready(function(){
+  $("a[data-value=\'welcome_tab\']").click();
+});
+'
+
+ui <- dashboardPage(header,
+                    sidebar,
+                    body,
+                    skin = "blue",
+                    tags$head(
+                      tags$style(
+                        HTML("code {color: #008080; /* Teal color */}")
+                      ),
+                      tags$script(HTML(js_code))
+                    )
+)
 
 
 server <- function(input, output, session) {
   
   
   login = FALSE
+  
   USER <- reactiveValues(login = login)
+  
+  observe({
+    if (USER$login == TRUE) {
+      delay(500, updateTabItems(session, "tabs", "welcome_tab"))
+    }
+  })
   
   observe({ 
     if (USER$login == FALSE) {
@@ -108,16 +137,21 @@ server <- function(input, output, session) {
   
   output$sidebarpanel <- renderUI({
     if (USER$login == TRUE) {
+      
       user_permission <- credentials[credentials$username_id == isolate(input$userName), "permission"]
       
       menuItems <- list()
       
       if (user_permission %in% c("none")) {
-        menuItems <- c(menuItems, list(menuItem("Create account", tabName = "create_account", icon = icon("user"))))
-      }
+        menuItems(
+          list(menuItem("Welcome", tabName = "welcome_tab", icon = icon("home"))),
+          menuItem("Create account", tabName = "create_account", icon = icon("user"))
+      )}
+      
       if (user_permission %in% c("basic")) {
         menuItems <- c(
           menuItems,
+          list(menuItem("Welcome", tabName = "welcome_tab", icon = icon("home"))),
           list(menuItem("Search", tabName = "search_db", icon = icon("search"))),
           list(menuItem("About", tabName = "about", icon = icon("info-circle")))
         )
@@ -132,7 +166,6 @@ server <- function(input, output, session) {
           list(menuItem("Create Account", tabName = "create_account", icon = icon("user")))
         )
       }
-      
       sidebarMenu(menuItems)
     }
   })
@@ -144,6 +177,12 @@ server <- function(input, output, session) {
         tabItem(tabName = "welcome_tab",
                 titlePanel("Welcome to S.E.A.L."),
                 fluidPage(
+                  p("Welcome to the S.E.A.L. Database – a scientific gateway to
+                    explore and manage comprehensive information about seal
+                    anatomy. The steps listed below, outline the inital steps of
+                    setting up your own database so that it may provide an
+                    understanding of seals and their anatomical nuances."),
+                  
                   p("1) The first step is to start building all the tables
                     required for managing the database. Use the SQL query ",
                     code("all_tables.sql",
@@ -175,6 +214,7 @@ server <- function(input, output, session) {
                          code("remove_rows.sql"),
                          " to delete the rows [125, 126, 127]"
                     ),
+                    
                     p("2) After having installed the tables and alterations have
                     been made, now is time to fill picture_number in data_tags,
                     data_reference, and data_uncertainty. Using the queries
@@ -223,6 +263,7 @@ server <- function(input, output, session) {
                     " column in ",
                     code("data_reference")
                   ),
+                  
                   p("3) After having altered the tables and each one contains
                     the necessary information about the seals, it is now time
                     to focus on the functions that allow for the automated
@@ -339,16 +380,6 @@ server <- function(input, output, session) {
     else {loginpage}
     
   })
-  
-  # output$selectedImage <- renderImage({
-  #   
-  #   img_path <- file.path("www", paste0(input$image, ".png"))
-  #   
-  #   list(src = img_path, 
-  #        alt = "Selected Image",
-  #        width = "100%")
-  # }, deleteFile = FALSE)
-  
   
   output$selectedImage <- renderImage({
     img_path <- file.path("www", paste0(input$image, ".png"))
