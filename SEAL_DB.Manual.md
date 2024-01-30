@@ -1280,6 +1280,54 @@ table <- dbGetQuery(con, query)
 <br>
 
 
+## 6. USE of Shiny APP
+
+<br>
 
 
+**1. Login**
+<br>
+
+ In order to use the shiny APP, download all relevant documents, most important one being the App.R. Don't forget to set your work directory to the right file and once everything is in place launch the app.
+
+ If everything loads properly you should arrive on the login screen. To enter the shiny app please enter the relevant connexion information for you. Admin will give you access to all the tabs, whereas the viewer will only allow you to browse and search the database. (Note that the option to create an account is not yet available) 
+
+ Before diving in the app itself, please note that if at any moment the app crashes or is not responding, you should reload the app in R.
+
+<br>
+
+**2.a Welcome page** 
+<br>
+When login  is successful you first arrive on the welcome page. This page was design as an educational tool to familiarise the user with the anatomy and bones of the different Pinnipeds. On this page you will be able to browse through diagrams and pictures showing what each bone of the collection look like. Use the scroll down menu to browse through it.
+
+<br>
+
+**2.b Search page** 
+<br>
+In this page, you will be able to search for different keywords depending on images you want, words from all columns are possible input. Note that the programme is able to search for individual words in a cell containing more than one.
+
+<br>
+
+**2.c Download data page** 
+<br>
+This page allows the user to download any data from the database to their own computer. Make sure you have the actual database installed and all path are correct.
+Note on changing the directory path in R to your own local one.
+
+<br>
+
+**2.c Update data page** 
+<br>
+In the eventually information implemented in the database are to be wrong or changes, this page will allow the user to browse through the tables.
+
+<br>
+
+**2.d Create account page** 
+<br>
+Please note that this page is currently not working, and will make the app crash if used.
+
+<br>
+
+**Note**
+<br>
+This manual is available on github and is also available in the about section of the app.
 
