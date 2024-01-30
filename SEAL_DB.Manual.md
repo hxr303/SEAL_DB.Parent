@@ -3,7 +3,7 @@
 <br> 
 
 **Authors**  
-*XiangRu Huang,Xavier Mserez, Clara Baumans*
+*XiangRu Huang, Xavier Mserez, Clara Baumans*
 
 **Contents**
 1. Installation of PostgresSQL & pgAdmin
