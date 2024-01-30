@@ -1,13 +1,15 @@
-# install.packages(c("shiny", "shinydashboard", "DT", "sodium", "RPostgreSQL", "DBI", "shinyjs", "shinyauthr"))
-
+# install.packages(c("shiny", "shinydashboard", "DT", "sodium", "RPostgreSQL", "DBI", "shinyjs", "shinyauthr", "here"))
 
 library(shiny)
 library(shinydashboard)
 library(DT)
 library(shinyjs)
 library(sodium)
+library(here)
 
 rm(list=ls())
+#setwd(here::here())
+setwd("/Users/emericmellet/Desktop/Local /SEAL_DB.Parent/SEAL_DB.Rapp")
 
 # Main login screen
 loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margin: 0 auto; padding: 20px;",
@@ -156,13 +158,11 @@ server <- function(input, output, session) {
                   
                   fluidRow(
                     box(
-                      # Dropdown menu for image selection
                       selectInput("image", "Select an Image:",
                                   choices = NULL,
                                   selected = NULL)
                     ),
                     box(
-                      # Code to display selected image
                       imageOutput("selectedImage")
                     )
                   )
@@ -278,3 +278,4 @@ server <- function(input, output, session) {
 
 
 shinyApp(ui = ui, server = server)
+
