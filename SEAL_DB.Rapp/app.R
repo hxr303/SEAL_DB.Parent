@@ -36,7 +36,7 @@ loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margi
                      br(),
                      tags$code("Username: Viewer  Password: sightseeing"),
                      br(),
-                     tags$code("Username: Guest (Create account)  Password: 123")
+                     tags$code("Username: Guest (Create account, not available now)  Password: 123")
                      
                    ))
 )
@@ -65,7 +65,7 @@ header <- dashboardHeader( title = "S.E.A.L Database",
 
 sidebar <- dashboardSidebar(uiOutput("sidebarpanel")) 
 body <- dashboardBody(shinyjs::useShinyjs(), uiOutput("body"))
-ui<-dashboardPage(header, sidebar, body, skin = "purple")
+ui<-dashboardPage(header, sidebar, body, skin = "blue")
 
 
 slidenames <- read.csv("SlideNames.csv")
