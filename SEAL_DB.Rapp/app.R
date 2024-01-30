@@ -5,6 +5,7 @@ library(shinydashboard)
 library(DT)
 library(shinyjs)
 library(sodium)
+library(shinyauthr)
 #library(here)
 
 rm(list=ls())
@@ -13,14 +14,23 @@ setwd("/Users/emericmellet/Desktop/Local /SEAL_DB.Parent/SEAL_DB.Rapp")
 
 loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margin: 0 auto; padding: 20px;",
                  wellPanel(
-                   tags$h2("LOG IN", class = "text-center", style = "padding-top: 0;color:#333; font-weight:600;"),
-                   img(src = "https://github.com/hxr303/S.E.A.L.-Database/blob/main/FlogoBN.jpg?raw=true", width = "200px", height = "160px", style = "display: block; margin: 0 auto;"),
-                   textInput("userName", placeholder="Username", label = tagList(icon("user"), "Username")),
-                   passwordInput("passwd", placeholder="Password", label = tagList(icon("unlock-alt"), "Password")),
+                   tags$h2("LOG IN", class = "text-center",
+                           style = "padding-top: 0;color:#333; font-weight:600;"),
+                   img(src = "https://github.com/hxr303/S.E.A.L.-Database/blob/main/FlogoBN.jpg?raw=true",
+                       width = "200px", height = "160px",
+                       style = "display: block; margin: 0 auto;"),
+                   textInput("userName", placeholder="Username",
+                             label = tagList(icon("user"),
+                                             "Username")),
+                   passwordInput("passwd",
+                                 placeholder="Password",
+                                 label = tagList(icon("unlock-alt"),
+                                                 "Password")),
                    br(),
                    div(
                      style = "text-align: center;",
-                     actionButton("login", "SIGN IN", style = "color: white; background-color:#3c8dbc;
+                     actionButton("login", "SIGN IN",
+                                  style = "color: white; background-color:#3c8dbc;
                                  padding: 10px 15px; width: 150px; cursor: pointer;
                                  font-size: 18px; font-weight: 600;"),
                      shinyjs::hidden(
@@ -70,12 +80,6 @@ body <- dashboardBody(shinyjs::useShinyjs(),
                       uiOutput("body")
 )
 
-js_code <- '
-$(document).ready(function(){
-  $("a[data-value=\'welcome_tab\']").click();
-});
-'
-
 ui <- dashboardPage(header,
                     sidebar,
                     body,
@@ -83,8 +87,7 @@ ui <- dashboardPage(header,
                     tags$head(
                       tags$style(
                         HTML("code {color: #008080; /* Teal color */}")
-                      ),
-                      tags$script(HTML(js_code))
+                      )
                     )
 )
 
@@ -115,11 +118,22 @@ server <- function(input, output, session) {
               USER$login <- TRUE
             } else {
               shinyjs::toggle(id = "nomatch", anim = TRUE, time = 1, animType = "fade")
-              shinyjs::delay(3000, shinyjs::toggle(id = "nomatch", anim = TRUE, time = 1, animType = "fade"))
+              shinyjs::delay(3000, shinyjs::toggle(id = "nomatch",
+                                                   anim = TRUE,
+                                                   time = 1,
+                                                   animType = "fade"))
             }
           } else {
-            shinyjs::toggle(id = "nomatch", anim = TRUE, time = 1, animType = "fade")
-            shinyjs::delay(3000, shinyjs::toggle(id = "nomatch", anim = TRUE, time = 1, animType = "fade"))
+            
+            shinyjs::toggle(id = "nomatch",
+                            anim = TRUE,
+                            time = 1,
+                            animType = "fade")
+            
+            shinyjs::delay(3000, shinyjs::toggle(id = "nomatch",
+                                                 anim = TRUE,
+                                                 time = 1,
+                                                 animType = "fade"))
           }
         } 
       }
@@ -146,7 +160,7 @@ server <- function(input, output, session) {
         menuItems(
           list(menuItem("Welcome", tabName = "welcome_tab", icon = icon("home"))),
           menuItem("Create account", tabName = "create_account", icon = icon("user"))
-      )}
+        )}
       
       if (user_permission %in% c("basic")) {
         menuItems <- c(
@@ -172,111 +186,87 @@ server <- function(input, output, session) {
   
   
   output$body <- renderUI({
-    if (USER$login == TRUE ) {
+    if (USER$login == TRUE) {
       tabItems(
         tabItem(tabName = "welcome_tab",
                 titlePanel("Welcome to S.E.A.L."),
                 fluidPage(
-                  p("Welcome to the S.E.A.L. Database – a scientific gateway to
-                    explore and manage comprehensive information about seal
-                    anatomy. The steps listed below, outline the inital steps of
-                    setting up your own database so that it may provide an
+                  p("Welcome to the S.E.A.L. Database – a scientific gateway
+                    to explore and manage comprehensive information about seal
+                    anatomy. The steps listed below outline the initial steps
+                    of setting up your own database so that it may provide an
                     understanding of seals and their anatomical nuances."),
                   
                   p("1) The first step is to start building all the tables
                     required for managing the database. Use the SQL query ",
-                    code("all_tables.sql",
-                         ". The query consists of five tables:",
-                         br(),
-                         "a. Data_tags -- These tables are still incomplete",
-                         br(),
-                         "b. Data_reference",
-                         br(),
-                         "c. Data_uncertainty",
-                         br(),
-                         "d. User_data",
-                         br(),
-                         "e. User_documentation",
-                         br(),
-                         "f. Now import the file ",
-                         code("data_tags.csv"),
-                         " into the ",
-                         code("data_tags"),
-                         " table, and ",
-                         code("link_path"),
-                         " into the ",
-                         code("data_reference"),
-                         " table in the ",
-                         code("link_path"),
-                         " column",
-                         br(),
-                         "g. Important note: use the query ",
-                         code("remove_rows.sql"),
-                         " to delete the rows [125, 126, 127]"
-                    ),
-                    
-                    p("2) After having installed the tables and alterations have
-                    been made, now is time to fill picture_number in data_tags,
-                    data_reference, and data_uncertainty. Using the queries
-                    and functions."),
+                    code("all_tables.sql"), ". The query consists of five tables:",
+                    br(),
+                    "a. Data_tags -- These tables are still incomplete",
+                    br(),
+                    "b. Data_reference",
+                    br(),
+                    "c. Data_uncertainty",
+                    br(),
+                    "d. User_data",
+                    br(),
+                    "e. User_documentation",
+                    br(),
+                    "f. Now import the file ",
+                    code("data_tags.csv"), " into the ", code("data_tags"),
+                    " table, and ",
+                    code("link_path"), " into the ", code("data_reference"),
+                    " table in the ", code("link_path"), " column",
+                    br(),
+                    "g. Important note: use the query ", code("remove_rows.sql"),
+                    " to delete the rows [125, 126, 127]"
+                  ),
+                  
+                  p("2) After having installed the tables and alterations have
+                    been made, now is the time to fill picture_number in",
+                    code("data_tags") ,",", code("data_reference"), ", and",
+                    code("data_uncertainty"), ". Using the queries and functions.",
                     "a. First, fill the ",
-                    code("picture_number"),
-                    " column in ",
-                    code("data_tags"),
-                    " using the ",
-                    code("picture_number_column_generator.sql"),
+                    code("picture_number"), " column in ", code("data_tags"),
+                    " using the ", code("picture_number_column_generator.sql"),
                     " query. This will use the function ",
                     code("generate_unique_random_number().sql"),
                     br(),
                     "b. Then use the queries to transfer the columns from ",
-                    code("data_tags"),
-                    " to ",
-                    code("data_reference"),
-                    " and ",
-                    code("data_uncertainty"),
+                    code("data_tags"), " to ", code("data_reference"),
+                    " and ", code("data_uncertainty"),
                     br(),
                     "   i. To transfer from ",
                     code("data_tags"),
                     " to ",
-                    code("data_reference"),
-                    ": ",
+                    code("data_reference"), ": ",
                     code("picture_number_from_data_tags_to_data_reference.sql"),
                     br(),
                     "   ii. To transfer from ",
-                    code("data_tags"),
-                    " to ",
-                    code("data_uncertainty"),
-                    ": ",
+                    code("data_tags"), " to ", code("data_uncertainty"), ": ",
                     code("picture_number_from_data_tags_to_data_uncertainty.sql"),
                     br(),
                     "c. Use the query ",
-                    code("insert_scrape_name.sql"),
-                    " to fill in the column ",
-                    code("scrape_name"),
-                    " in ",
-                    code("data_tags"),
+                    code("insert_scrape_name.sql")," to fill in the column ",
+                    code("scrape_name")," in ", code("data_tags"),
                     br(),
-                    "d. Use the query ",
-                    code("store_image_as_binary_file.sql"),
-                    " to fill in the ",
-                    code("stored_image"),
-                    " column in ",
-                    code("data_reference")
-                  ),
-                  
-                  p("3) After having altered the tables and each one contains
-                    the necessary information about the seals, it is now time
-                    to focus on the functions that allow for the automated
-                    scalability of the database."),
-                  
-                  h3("Image Viewer"),
-                  p("This database currently contains bone
-                    images from six species distributed
-                    across three families within the suborder
+                    "d. Use the query ", code("store_image_as_binary_file.sql"),
+                    " to fill in the ", code("stored_image"), " column in ", 
+                    code("data_reference"),
+                    
+                    p("3) After having altered the tables and each one contains the
+                  necessary information about the seals, it is now time to focus
+                  on the functions that allow for the automated scalability of
+                  the database."),
+                    
+                    h3("Image Viewer"),
+                    p("This database currently contains bone images from six 
+                    species distributed across three families within the suborder 
                     Pinnipedia. The families present are Phocidae (fur seals and
                     sea lions), Odobenidae (walruses) and Phocidae (fur seals)
                     [1], [2]."),
+                  )
                 ),
+                
                 fluidPage(
                   
                   fluidRow(
@@ -299,86 +289,84 @@ server <- function(input, output, session) {
                       imageOutput("selectedImage")
                     )
                   )
-                )
-        ),
-        
-        tabItem(tabName = "search_tab",
-                h2("Search"),
-                fluidRow(
-                  box(
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    textInput("search_input", label = "Enter search words", value = ""),
-                    actionButton("search_button", "Search")
-                  )
                 ),
-                fluidRow(
-                  box(
-                    title = "Search Results",
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    DTOutput("search_result"),
-                    textOutput("error")
-                  )
-                )
-        ),
-        
-        tabItem(tabName = "download_tab",
-                fluidPage(
-                  titlePanel("Download Data"),
-                  p("This section allows you to download data from the database. Customize this UI as needed."),
-                  fluidRow(
-                    box(
-                      title = "Select Download Options",
-                      status = "primary",
-                      solidHeader = TRUE,
-                      width = 12,
-                      textInput("search_input", label = "Enter search key",
-                                value = "", placeholder = " your search key "),
-                      selectInput("download_option", "Select Download Option",
-                                  choices = c("Server 1", "Server 2", "Server 3")),
-                      downloadButton("download_data_btn", "Download Data")
-                    )
-                  )
-                )
-        ),
-        
-        tabItem(tabName = "update_tab",
-                fluidPage(
-                  titlePanel("Update Data"),
-                  p("This section allows you to update data in the database.
+                
+                tabItem(tabName = "search_tab",
+                        h2("Search"),
+                        fluidRow(
+                          box(
+                            status = "primary",
+                            solidHeader = TRUE,
+                            width = 12,
+                            textInput("search_input", label = "Enter search words", value = ""),
+                            actionButton("search_button", "Search")
+                          )
+                        ),
+                        fluidRow(
+                          box(
+                            title = "Search Results",
+                            status = "primary",
+                            solidHeader = TRUE,
+                            width = 12,
+                            DTOutput("search_result"),
+                            textOutput("error")
+                          )
+                        )
+                ),
+                
+                tabItem(tabName = "download_tab",
+                        fluidPage(
+                          titlePanel("Download Data"),
+                          p("This section allows you to download data from the database. Customize this UI as needed."),
+                          fluidRow(
+                            box(
+                              title = "Select Download Options",
+                              status = "primary",
+                              solidHeader = TRUE,
+                              width = 12,
+                              textInput("search_input", label = "Enter search key",
+                                        value = "", placeholder = " your search key "),
+                              selectInput("download_option", "Select Download Option",
+                                          choices = c("Server 1", "Server 2", "Server 3")),
+                              downloadButton("download_data_btn", "Download Data")
+                            )
+                          )
+                        )
+                ),
+                
+                tabItem(tabName = "update_tab",
+                        fluidPage(
+                          titlePanel("Update Data"),
+                          p("This section allows you to update data in the database.
                     Customize this UI as needed."),
-                  fluidRow(
-                    box(
-                      title = "Update Table",
-                      status = "primary",
-                      solidHeader = TRUE,
-                      width = 12,
-                      DTOutput("update_table")
-                    )
-                  )
-                )
-        ),
-        
-        tabItem(tabName = "create_account",
-                h2("Create Account"),
-                textInput("new_username", "Username"),
-                passwordInput("new_password", "Password",
-                              placeholder = "Beware of the password you use"),
-                passwordInput("confirm_password", "Confirm Password"),
-                textInput("additional_comments", "Additional Comments",
-                          placeholder = "Please write name and student ID
+                          fluidRow(
+                            box(
+                              title = "Update Table",
+                              status = "primary",
+                              solidHeader = TRUE,
+                              width = 12,
+                              DTOutput("update_table")
+                            )
+                          )
+                        )
+                ),
+                
+                tabItem(tabName = "create_account",
+                        h2("Create Account"),
+                        textInput("new_username", "Username"),
+                        passwordInput("new_password", "Password",
+                                      placeholder = "Beware of the password you use"),
+                        passwordInput("confirm_password", "Confirm Password"),
+                        textInput("additional_comments", "Additional Comments",
+                                  placeholder = "Please write name and student ID
                           if applicable"),
-                actionButton("create_account_btn", "Create Account")
+                        actionButton("create_account_btn", "Create Account")
+                )
         )
-      )
-      
+      )  
     }
     
     else {loginpage}
-    
   })
   
   output$selectedImage <- renderImage({
@@ -387,16 +375,6 @@ server <- function(input, output, session) {
          alt = "Selected Image",
          width = "100%")
   }, deleteFile = FALSE)
-  
-  output$results <- DT::renderDataTable({
-    datatable(iris, options = list(autoWidth = TRUE,
-                                   searching = FALSE))
-  })
-  
-  output$results2 <- DT::renderDataTable({
-    datatable(mtcars, options = list(autoWidth = TRUE,
-                                     searching = FALSE))
-  })
 }
 
 
