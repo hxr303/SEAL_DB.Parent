@@ -9,7 +9,7 @@ rm(list=ls())
 
 con <- dbConnect(
   PostgreSQL(),
-  dbname = "TEST1",           #name of imported database
+  dbname = "TEST1",             #name of imported database
   port = 5432,                   #port of imported server
   user = "postgres",             #username
   password = "password")         #password

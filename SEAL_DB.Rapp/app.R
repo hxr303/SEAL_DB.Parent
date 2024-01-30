@@ -63,7 +63,11 @@ header <- dashboardHeader( title = "S.E.A.L Database",
 
 sidebar <- dashboardSidebar(uiOutput("sidebarpanel")) 
 body <- dashboardBody(shinyjs::useShinyjs(), uiOutput("body"))
-ui<-dashboardPage(header, sidebar, body, skin = "blue")   
+ui<-dashboardPage(header, sidebar, body, skin = "purple")
+
+
+slidenames <- read.csv("SlideNames.csv")
+slidenames.vector <- unique(slidenames$Slide.Name)
 
 
 server <- function(input, output, session) {
@@ -137,8 +141,6 @@ server <- function(input, output, session) {
   })
   
   
-  
-  
   output$body <- renderUI({
     if (USER$login == TRUE ) {
       tabItems(
@@ -148,9 +150,22 @@ server <- function(input, output, session) {
                   p("This database currently contains bone
                     images from six species distributed
                     across three families within the suborder
-                    Pinnipedia. The families present are Phocidae
-                    (fur seals and sea lions), Odobenidae
-                    (walruses), andOtariidae (eared seals) [1],[2].")
+                    Pinnipedia. The families present are Phocidae (fur seals and
+                    sea lions), Odobenidae (walruses) and Phocidae (fur seals)
+                    [1], [2]."),
+                  
+                  fluidRow(
+                    box(
+                      # Dropdown menu for image selection
+                      selectInput("image", "Select an Image:",
+                                  choices = NULL,
+                                  selected = NULL)
+                    ),
+                    box(
+                      # Code to display selected image
+                      imageOutput("selectedImage")
+                    )
+                  )
                 )
         ),
         
@@ -177,7 +192,25 @@ server <- function(input, output, session) {
                 )
         ),
         
-        tabItem(tabName = "dowload_tab"), 
+        tabItem(tabName = "download_tab",
+                fluidPage(
+                  titlePanel("Download Data"),
+                  p("This section allows you to download data from the database. Customize this UI as needed."),
+                  fluidRow(
+                    box(
+                      title = "Select Download Options",
+                      status = "primary",
+                      solidHeader = TRUE,
+                      width = 12,
+                      textInput("search_input", label = "Enter search key",
+                                value = "", placeholder = " your search key "),
+                      selectInput("download_option", "Select Download Option",
+                                  choices = c("Server 1", "Server 2", "Server 3")),
+                      downloadButton("download_data_btn", "Download Data")
+                    )
+                  )
+                )
+        ),
         
         tabItem(tabName = "update_tab",
                 fluidPage(
@@ -215,6 +248,23 @@ server <- function(input, output, session) {
     
   })
   
+  output$selectedImage <- renderImage({
+    # Path to directory containing images
+    img_dir <- "www/"
+    
+    # Full file path to the selected (.png added to the end of the names specified in the vector)
+    img_path <- file.path(img_dir, paste0(input$image, ".png"))
+    
+    # Render the selected image
+    list(src = img_path, 
+         alt = "Selected Image",
+         width = "100%")
+  }, deleteFile = FALSE) # The file is stored in the UI once loaded (?)
+  
+  observe({
+    updateSelectInput(session, "image", choices = slidenames.vector)
+  })
+  
   output$results <- DT::renderDataTable({
     datatable(iris, options = list(autoWidth = TRUE,
                                    searching = FALSE))
@@ -228,5 +278,3 @@ server <- function(input, output, session) {
 
 
 shinyApp(ui = ui, server = server)
-
-
