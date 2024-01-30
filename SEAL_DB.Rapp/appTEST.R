@@ -181,6 +181,20 @@ server <- function(input, output, session) {
     }
   })
   
+  ### TESTER CODE FOR THE MAIN app.R ##########################################
+  # observe({
+  #   updateSelectInput(session, "image", choices = slidenames.vector)
+  # })
+  # 
+  # observe({
+  #   print(slidenames.vector)
+  #   img_path <- file.path("www/", paste0(input$image, ".png"))
+  #   print(img_path)
+  #   updateSelectInput(session, "image", choices = slidenames.vector)
+  # })
+  
+  #############################################################################
+  
   # Expose updates for About Seal tab
   observeEvent(updates(), {
     updates_data <- updates()

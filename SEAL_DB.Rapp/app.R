@@ -5,13 +5,12 @@ library(shinydashboard)
 library(DT)
 library(shinyjs)
 library(sodium)
-library(here)
+#library(here)
 
 rm(list=ls())
 #setwd(here::here())
 setwd("/Users/emericmellet/Desktop/Local /SEAL_DB.Parent/SEAL_DB.Rapp")
 
-# Main login screen
 loginpage <- div(id = "loginpage", style = "width: 500px; max-width: 100%; margin: 0 auto; padding: 20px;",
                  wellPanel(
                    tags$h2("LOG IN", class = "text-center", style = "padding-top: 0;color:#333; font-weight:600;"),
@@ -66,10 +65,6 @@ header <- dashboardHeader( title = "S.E.A.L Database",
 sidebar <- dashboardSidebar(uiOutput("sidebarpanel")) 
 body <- dashboardBody(shinyjs::useShinyjs(), uiOutput("body"))
 ui<-dashboardPage(header, sidebar, body, skin = "blue")
-
-
-slidenames <- read.csv("SlideNames.csv")
-slidenames.vector <- unique(slidenames$Slide.Name)
 
 
 server <- function(input, output, session) {
@@ -149,38 +144,41 @@ server <- function(input, output, session) {
         tabItem(tabName = "welcome_tab",
                 titlePanel("Welcome to S.E.A.L."),
                 fluidPage(
-                  h3("1) The first step is to start building all the tables required for managing the database. Use the SQL query ",
-                    code("all_tables.sql"),
-                    ". The query consists of five tables:",
-                    br(),
-                    "a. Data_tags -- These tables are still incomplete",
-                    br(),
-                    "b. Data_reference",
-                    br(),
-                    "c. Data_uncertainty",
-                    br(),
-                    "d. User_data",
-                    br(),
-                    "e. User_documentation",
-                    br(),
-                    "f. Now import the file ",
-                    code("data_tags.csv"),
-                    " into the ",
-                    code("data_tags"),
-                    " table, and ",
-                    code("link_path"),
-                    " into the ",
-                    code("data_reference"),
-                    " table in the ",
-                    code("link_path"),
-                    " column",
-                    br(),
-                    "g. Important note: use the query ",
-                    code("remove_rows.sql"),
-                    " to delete the rows [125, 126, 127]"
-                  ),
-                  h3("2) After having installed the tables and alterations have been made, now is time to fill picture_number in data_tags, data_reference, and data_uncertainty. Using the queries and functions."),
-                  p(
+                  p("1) The first step is to start building all the tables
+                    required for managing the database. Use the SQL query ",
+                    code("all_tables.sql",
+                         ". The query consists of five tables:",
+                         br(),
+                         "a. Data_tags -- These tables are still incomplete",
+                         br(),
+                         "b. Data_reference",
+                         br(),
+                         "c. Data_uncertainty",
+                         br(),
+                         "d. User_data",
+                         br(),
+                         "e. User_documentation",
+                         br(),
+                         "f. Now import the file ",
+                         code("data_tags.csv"),
+                         " into the ",
+                         code("data_tags"),
+                         " table, and ",
+                         code("link_path"),
+                         " into the ",
+                         code("data_reference"),
+                         " table in the ",
+                         code("link_path"),
+                         " column",
+                         br(),
+                         "g. Important note: use the query ",
+                         code("remove_rows.sql"),
+                         " to delete the rows [125, 126, 127]"
+                    ),
+                    p("2) After having installed the tables and alterations have
+                    been made, now is time to fill picture_number in data_tags,
+                    data_reference, and data_uncertainty. Using the queries
+                    and functions."),
                     "a. First, fill the ",
                     code("picture_number"),
                     " column in ",
@@ -225,7 +223,10 @@ server <- function(input, output, session) {
                     " column in ",
                     code("data_reference")
                   ),
-                  h3("3) After having altered the tables and each one contains the necessary information about the seals, it is now time to focus on the functions that allow for the automated scalability of the database."),
+                  p("3) After having altered the tables and each one contains
+                    the necessary information about the seals, it is now time
+                    to focus on the functions that allow for the automated
+                    scalability of the database."),
                   
                   h3("Image Viewer"),
                   p("This database currently contains bone
@@ -234,12 +235,24 @@ server <- function(input, output, session) {
                     Pinnipedia. The families present are Phocidae (fur seals and
                     sea lions), Odobenidae (walruses) and Phocidae (fur seals)
                     [1], [2]."),
+                ),
+                fluidPage(
                   
                   fluidRow(
                     box(
                       selectInput("image", "Select an Image:",
-                                  choices = NULL,
-                                  selected = NULL)
+                                  
+                                  choices = c( "Overview", "Atlas", "Baculum",
+                                               "Brain Endocast", "Femur", 
+                                               "Complete Forelimb", "Humerus",
+                                               "Lower Jaw", "Mandible", "Pelvis",
+                                               "Phalanges", "Radius", "Rib",
+                                               "Scapula", "Skull", 
+                                               "Tibia and Fibula", "Ulna",
+                                               "Cervical Vertebrae", 
+                                               "Lumbar Vertebrae",
+                                               "Thoracical Vertebrae"),
+                                  selected = "Overview" )
                     ),
                     box(
                       imageOutput("selectedImage")
@@ -327,22 +340,22 @@ server <- function(input, output, session) {
     
   })
   
+  # output$selectedImage <- renderImage({
+  #   
+  #   img_path <- file.path("www", paste0(input$image, ".png"))
+  #   
+  #   list(src = img_path, 
+  #        alt = "Selected Image",
+  #        width = "100%")
+  # }, deleteFile = FALSE)
+  
+  
   output$selectedImage <- renderImage({
-    # Path to directory containing images
-    img_dir <- "www/"
-    
-    # Full file path to the selected (.png added to the end of the names specified in the vector)
-    img_path <- file.path(img_dir, paste0(input$image, ".png"))
-    
-    # Render the selected image
+    img_path <- file.path("www", paste0(input$image, ".png"))
     list(src = img_path, 
          alt = "Selected Image",
          width = "100%")
-  }, deleteFile = FALSE) # The file is stored in the UI once loaded (?)
-  
-  observe({
-    updateSelectInput(session, "image", choices = slidenames.vector)
-  })
+  }, deleteFile = FALSE)
   
   output$results <- DT::renderDataTable({
     datatable(iris, options = list(autoWidth = TRUE,
