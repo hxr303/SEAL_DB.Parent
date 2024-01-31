@@ -700,7 +700,7 @@ END $$;
 
 *CALL*
 ```sql
--- SELECT import_image('C:\Program Files\PostgreSQL\16\data\Storage\Export1.jpg', ARRAY['q','w','e','r','t','y','u'], ARRAY[TRUE, TRUE, FALSE, FALSe, TRUE, TRUE, TRUE])
+-- SELECT import_image('C:\Program Files\PostgreSQL\16\data\Pinniped bones\A. pusilus_1\IMG_1786.JPG', ARRAY['q','w','e','r','t','y','u'], ARRAY[TRUE, TRUE, FALSE, FALSe, TRUE, TRUE, TRUE])
 
 -- SELECT export_image(557492, 'C:\Program Files\PostgreSQL\16\data\Storage');
 ```
