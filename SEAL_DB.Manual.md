@@ -212,7 +212,7 @@ DECLARE
     l_picture_number INTEGER;
     l_file_path text;
     l_oid OID;
-    l_directory text := 'C:\Program Files\PostgreSQL\16\data\PermissionData\Export\';
+    l_directory text := 'C:\Program Files\PostgreSQL\16\data\Storage\';
 BEGIN
     -- Generate a unique random number
     l_picture_number := generate_unique_random_number();
