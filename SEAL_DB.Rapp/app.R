@@ -270,111 +270,108 @@ server <- function(input, output, session) {
                 fluidPage(
                   
                   fluidRow(
-                    box(
-                      selectInput("image", "Select an Image:",
-                                  
-                                  choices = c( "Overview", "Atlas", "Baculum",
-                                               "Brain Endocast", "Femur", 
-                                               "Complete Forelimb", "Humerus",
-                                               "Lower Jaw", "Mandible", "Pelvis",
-                                               "Phalanges", "Radius", "Rib",
-                                               "Scapula", "Skull", 
-                                               "Tibia and Fibula", "Ulna",
-                                               "Cervical Vertebrae", 
-                                               "Lumbar Vertebrae",
-                                               "Thoracical Vertebrae"),
-                                  selected = "Overview" )
-                    ),
-                    box(
-                      imageOutput("selectedImage")
-                    )
+                    selectInput("image", "Select an Image:",
+                                
+                                choices = c( "Overview", "Atlas", "Baculum",
+                                             "Brain Endocast", "Femur", 
+                                             "Complete Forelimb", "Humerus",
+                                             "Lower Jaw", "Mandible", "Pelvis",
+                                             "Phalanges", "Radius", "Rib",
+                                             "Scapula", "Skull", 
+                                             "Tibia and Fibula", "Ulna",
+                                             "Cervical Vertebrae", 
+                                             "Lumbar Vertebrae",
+                                             "Thoracical Vertebrae"),
+                                selected = "Overview" ),
+                    imageOutput("selectedImage")
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "search_tab",
+                h2("Search"),
+                fluidRow(
+                  box(
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    textInput("search_input", label = "Enter search words", value = ""),
+                    actionButton("search_button", "Search")
                   )
                 ),
-                
-                tabItem(tabName = "search_tab",
-                        h2("Search"),
-                        fluidRow(
-                          box(
-                            status = "primary",
-                            solidHeader = TRUE,
-                            width = 12,
-                            textInput("search_input", label = "Enter search words", value = ""),
-                            actionButton("search_button", "Search")
-                          )
-                        ),
-                        fluidRow(
-                          box(
-                            title = "Search Results",
-                            status = "primary",
-                            solidHeader = TRUE,
-                            width = 12,
-                            DTOutput("search_result"),
-                            textOutput("error")
-                          )
-                        )
-                ),
-                
-                tabItem(tabName = "download_tab",
-                        fluidPage(
-                          titlePanel("Download Data"),
-                          p("This section allows you to download data from the database. Customize this UI as needed."),
-                          fluidRow(
-                            box(
-                              title = "Select Download Options",
-                              status = "primary",
-                              solidHeader = TRUE,
-                              width = 12,
-                              textInput("search_input", label = "Enter search key",
-                                        value = "", placeholder = " your search key "),
-                              selectInput("download_option", "Select Download Option",
-                                          choices = c("Server 1", "Server 2", "Server 3")),
-                              downloadButton("download_data_btn", "Download Data")
-                            )
-                          )
-                        )
-                ),
-                
-                tabItem(tabName = "update_tab",
-                        fluidPage(
-                          titlePanel("Update Data"),
-                          p("This section allows you to update data in the database.
-                    Customize this UI as needed."),
-                          fluidRow(
-                            box(
-                              title = "Update Table",
-                              status = "primary",
-                              solidHeader = TRUE,
-                              width = 12,
-                              DTOutput("update_table")
-                            )
-                          )
-                        )
-                ),
-                
-                tabItem(tabName = "create_account",
-                        h2("Create Account"),
-                        textInput("new_username", "Username"),
-                        passwordInput("new_password", "Password",
-                                      placeholder = "Beware of the password you use"),
-                        passwordInput("confirm_password", "Confirm Password"),
-                        textInput("additional_comments", "Additional Comments",
-                                  placeholder = "Please write name and student ID
-                          if applicable"),
-                        actionButton("create_account_btn", "Create Account")
+                fluidRow(
+                  box(
+                    title = "Search Results",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    DTOutput("search_result"),
+                    textOutput("error")
+                  )
                 )
+        ),
+        
+        tabItem(tabName = "download_tab",
+                fluidPage(
+                  titlePanel("Download Data"),
+                  p("This section allows you to download data from the database. Customize this UI as needed."),
+                  fluidRow(
+                    box(
+                      title = "Select Download Options",
+                      status = "primary",
+                      solidHeader = TRUE,
+                      width = 12,
+                      textInput("search_input", label = "Enter search key",
+                                value = "", placeholder = " your search key "),
+                      selectInput("download_option", "Select Download Option",
+                                  choices = c("Server 1", "Server 2", "Server 3")),
+                      downloadButton("download_data_btn", "Download Data")
+                    )
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "update_tab",
+                fluidPage(
+                  titlePanel("Update Data"),
+                  p("This section allows you to update data in the database.
+                    Customize this UI as needed."),
+                  fluidRow(
+                    box(
+                      title = "Update Table",
+                      status = "primary",
+                      solidHeader = TRUE,
+                      width = 12,
+                      DTOutput("update_table")
+                    )
+                  )
+                )
+        ),
+        
+        tabItem(tabName = "create_account",
+                h2("Create Account"),
+                textInput("new_username", "Username"),
+                passwordInput("new_password", "Password",
+                              placeholder = "Beware of the password you use"),
+                passwordInput("confirm_password", "Confirm Password"),
+                textInput("additional_comments", "Additional Comments",
+                          placeholder = "Please write name and student ID
+                          if applicable"),
+                actionButton("create_account_btn", "Create Account")
         )
-      )  
+      )
     }
     
-    else {loginpage}
+  else {loginpage}
+    
   })
-  
-  output$selectedImage <- renderImage({
-    img_path <- file.path("www", paste0(input$image, ".png"))
-    list(src = img_path, 
-         alt = "Selected Image",
-         width = "100%")
-  }, deleteFile = FALSE)
+
+output$selectedImage <- renderImage({
+  img_path <- file.path("www", paste0(input$image, ".png"))
+  list(src = img_path, 
+       alt = "Selected Image",
+       width = "100%")
+}, deleteFile = FALSE)
 }
 
 
