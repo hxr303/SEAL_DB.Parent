@@ -30,7 +30,7 @@
 https://www.postgresql.org/download/
 
 * Set default port *5432*
-* Set password for default user *postgre*
+* Set password for default user *postgres*
 
 <br> 
 
@@ -1307,38 +1307,47 @@ table <- dbGetQuery(con, query)
 
 <br>
 
-**2.a Welcome page** 
+**2. Tabs**
+
 <br>
+
+   1. Welcome page
+
+
 When login  is successful you first arrive on the welcome page. This page was design as an educational tool to familiarise the user with the anatomy and bones of the different Pinnipeds. On this page you will be able to browse through diagrams and pictures showing what each bone of the collection look like. Use the scroll down menu to browse through it.
 
 <br>
 
-**2.b Search page** 
+   2. Search page
+
 <br>
 In this page, you will be able to search for different keywords depending on images you want, words from all columns are possible input. Note that the programme is able to search for individual words in a cell containing more than one.
 
 <br>
 
-**2.c Download data page** 
+   3. Download data page
+
 <br>
+
 This page allows the user to download any data from the database to their own computer. Make sure you have the actual database installed and all path are correct.
 Note on changing the directory path in R to your own local one.
 
 <br>
 
-**2.c Update data page** 
+   4. Update data page
+
 <br>
+
 In the eventually information implemented in the database are to be wrong or changes, this page will allow the user to browse through the tables.
 
 <br>
 
-**2.d Create account page** 
+   5. Create account page
+
 <br>
+
 Please note that this page is currently not working, and will make the app crash if used.
 
 <br>
-
-**Note**
 <br>
-This manual is available on github and is also available in the about section of the app.
 
