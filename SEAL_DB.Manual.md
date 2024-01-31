@@ -697,6 +697,15 @@ END $$;
 ```
 
 <br>
+
+*CALL*
+```sql
+-- SELECT import_image('C:\Program Files\PostgreSQL\16\data\PermissionData\Export1.jpg', ARRAY['q','w','e','r','t','y','u'], ARRAY[TRUE, TRUE, FALSE, FALSe, TRUE, TRUE, TRUE])
+
+-- SELECT export_image(803840, 'C:\Program Files\PostgreSQL\16\data\PermissionData');
+```
+
+<br>
 <br>
 
 **Note: run the following code *only* when import doesn’t work properly.**
@@ -735,6 +744,8 @@ ADD CONSTRAINT data_reference_data_tags_fk
 FOREIGN KEY (picture_number)
 REFERENCES public.data_tags (picture_number);
 ```
+
+
 
 
 <br> 
